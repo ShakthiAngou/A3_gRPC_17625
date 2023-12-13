@@ -1,0 +1,127 @@
+// a3.proto
+
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+// User entity
+message User {
+  string user_id = 1;
+  string username = 2;
+}
+
+// Post entity
+message Post {
+  string post_id = 1;
+  string title = 2;
+  string text = 3;
+  string video_url = 4;
+  string image_url = 5;
+  string author_id = 6;
+  int32 score = 7;
+  enum PState {
+    NORMAL = 0;
+    LOCKED = 1;
+    HIDDEN = 2;
+  }
+  PState state = 8;
+  google.protobuf.Timestamp publication_date = 9;
+  string subreddit_id = 10;
+}
+
+// Comment entity
+message Comment {
+  string comment_id = 1;
+  string post_id = 2;
+  string parent_comment_id = 3;
+  string author_id = 4;
+  string text = 5;
+  int32 score = 6;
+  enum CState {
+    NORMAL = 0;
+    HIDDEN = 1;
+  }
+  CState state = 7;
+  google.protobuf.Timestamp publication_date = 8;
+  bool has_replies = 9;
+  repeated Comment sub_comments = 10;
+}
+
+// Subreddit entity
+message Subreddit {
+  string subreddit_id = 1;
+  string name = 2;
+  enum SubState {
+    PUBLIC = 0;
+    PRIVATE = 1;
+    HIDDEN = 2;
+  }
+  SubState state = 3;
+  repeated string tags = 4;
+}
+
+service RedditService {
+  // Create a Post
+  rpc CreatePost(Post) returns (Post) {}
+
+  // Upvote or downvote a Post
+  rpc VotePost(Vote) returns (Post) {}
+
+  // Retrieve Post content
+  rpc GetPostContent(PostID) returns (Post) {}
+
+  // Create a Comment
+  rpc CreateComment(Comment) returns (Comment) {}
+
+  // Upvote or downvote a Comment
+  rpc VoteComment(Vote) returns (Comment) {}
+
+  // Retrieve a list of N most upvoted comments under a post
+  rpc GetMostUpvotedComments(CommentQuery) returns (CommentsResponse) {}
+
+  // Expand a comment branch
+  rpc ExpandCommentBranch(ExpandCommentQuery) returns (CommentTree) {}
+
+  // Extra credit - Monitor updates
+  rpc MonitorUpdates(Post) returns (stream ScoreUpdates) {}
+}
+
+// Message for voting
+message Vote {
+  string entity_id = 1; // ID of the entity (Post/Comment) being voted
+  bool is_upvote = 2;   // Indicates if it's an upvote (true) or downvote (false)
+}
+
+// Message for Post ID
+message PostID {
+  string post_id = 1; // ID of the Post
+}
+
+// Message for querying comments
+message CommentQuery {
+  string post_id = 1;
+  int32 limit = 2;
+}
+
+// Message for expanding comment branch
+message ExpandCommentQuery {
+  string comment_id = 1;
+  int32 limit = 2;
+}
+
+// Response for comments
+message CommentsResponse {
+  repeated Comment comments = 1;
+}
+
+// Response for comment tree
+message CommentTree {
+  repeated Comment comments = 1;
+  map<string, CommentsResponse> replies = 2; // Map to indicate replies under comments
+}
+
+// Message for monitoring score updates
+message ScoreUpdates {
+  string entity_id = 1;
+  int32 new_score = 2;
+}

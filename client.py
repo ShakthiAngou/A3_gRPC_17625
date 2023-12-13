@@ -1,9 +1,3 @@
-import sys
-import os
-
-# proto_generated_path = os.path.abspath('../generated_code/')
-# sys.path.append(proto_generated_path)
-
 import grpc
 import a3_pb2
 import a3_pb2_grpc

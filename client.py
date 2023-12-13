@@ -17,6 +17,7 @@ class RedditClient:
             author_id=author_id,
             subreddit_id=subreddit_id
         )
+        print("this is the post:", post)
         response = self.stub.CreatePost(post)
         return response
 
@@ -30,17 +31,13 @@ class RedditClient:
         response = self.stub.GetPostContent(post_id_request)
         return response
 
-    def create_comment(self, comment_id, post_id, parent_comment_id, author_id, text):
+    def create_comment(self, post_id, parent_comment_id, author_id, text):
         comment = a3_pb2.Comment(
-            comment_id=comment_id,
             post_id=post_id,
             parent_comment_id=parent_comment_id,
             author_id=author_id,
             text=text,
-            score=0,
-            state=a3_pb2.Comment.NORMAL,
-            publication_date=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),  # Current timestamp
-            has_replies=False
+            #publication_date=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),  # Current timestamp
         )
         response = self.stub.CreateComment(comment)
         return response
@@ -70,20 +67,24 @@ if __name__ == '__main__':
     created_post = client.create_post("Sample Title", "Sample Text", "user123", "subreddit456")
     print("Created Post:", created_post)
 
-    upvoted_post = client.upvote_or_downvote_post("123", True)
+    upvoted_post = client.upvote_or_downvote_post("1", True)
     print("Upvoted Post:", upvoted_post)
 
-    retrieved_post = client.get_post_content("123")
+    retrieved_post = client.get_post_content("1")
     print("Retrieved Post Content:", retrieved_post)
 
-    created_comment = client.create_comment("456", "123", "789", "user456", "Sample Comment")
+    created_comment = client.create_comment("1", "", "user456", "Sample Comment")
     print("Created Comment:", created_comment)
 
-    upvoted_comment = client.upvote_or_downvote_comment("456", True)
+    upvoted_comment = client.upvote_or_downvote_comment("1", True)
     print("Upvoted Comment:", upvoted_comment)
 
-    most_upvoted_comments = client.get_most_upvoted_comments("123", 5)
+    most_upvoted_comments = client.get_most_upvoted_comments("1", 5)
     print("Most Upvoted Comments:", most_upvoted_comments)
 
-    expanded_comments = client.expand_comment_branch("456", 2)
+    created_comment3 = client.create_comment("", "1", "shakthi", "Sample Comment 2") # comment_id 2
+    created_comment4 = client.create_comment("", "1", "shakthi", "Sample Comment 3") # comment_id 3
+    created_comment5 = client.create_comment("", "2", "shakthi", "Sample Comment 4") # comment_id 4
+    created_comment6 = client.create_comment("", "2", "shakthi", "Sample Comment 5") # comment_id 5
+    expanded_comments = client.expand_comment_branch("1", 2)
     print("Expanded Comment Branch:", expanded_comments)

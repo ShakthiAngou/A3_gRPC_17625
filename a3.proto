@@ -25,8 +25,8 @@ message Post {
     HIDDEN = 2;
   }
   PState state = 8;
-  google.protobuf.Timestamp publication_date = 9;
-  string subreddit_id = 10;
+  // google.protobuf.Timestamp publication_date = 9;
+  string subreddit_id = 9;
 }
 
 // Comment entity
@@ -42,9 +42,9 @@ message Comment {
     HIDDEN = 1;
   }
   CState state = 7;
-  google.protobuf.Timestamp publication_date = 8;
-  bool has_replies = 9;
-  repeated Comment sub_comments = 10;
+  // google.protobuf.Timestamp publication_date = 8;
+  bool has_replies = 8;
+  repeated Comment sub_comments = 9;
 }
 
 // Subreddit entity

@@ -32,8 +32,8 @@ class DummyStorage:
         return self.comments.get(comment_id)
 
     def get_comments_by_post_id(self, post_id):
-        filtered =  [x for x in self.comments if x.post_id == post_id]
-        return filtered
+        filtered_comments = [comment for comment in self.comments.values() if comment.post_id == post_id]
+        return filtered_comments
     
     def get_comments_by_comment_id(self, comment_id):
         comment = self.comments.get(comment_id)
@@ -58,7 +58,7 @@ class RedditServicer(a3_pb2_grpc.RedditServiceServicer):
             author_id=request.author_id,
             score=0,
             state=a3_pb2.Post.NORMAL,
-            publication_date=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),  # Current timestamp
+            #publication_date=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),  # Current timestamp
             subreddit_id=request.subreddit_id
         )
         self.storage.create_post(post)
@@ -98,9 +98,9 @@ class RedditServicer(a3_pb2_grpc.RedditServiceServicer):
             parent_comment_id = request.parent_comment_id,
             author_id = request.author_id,
             text = request.text,
-            score = request.score,
+            score = 0,
             state = a3_pb2.Comment.NORMAL,
-            publication_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            #publication_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             has_replies= False
         )
         self.storage.create_comment(comment)
@@ -144,8 +144,8 @@ class RedditServicer(a3_pb2_grpc.RedditServiceServicer):
         comment_tree.comments.extend(most_upvoted_sub_comments)
 
         for comment in most_upvoted_sub_comments:
-            sub_comments_dict = {comment.comment_id: a3_pb2.CommentsResponse(comments=comment.sub_comments[:n])}
-            comment_tree.replies[comment.comment_id].update(sub_comments_dict)
+            sub_comments_response = a3_pb2.CommentsResponse(comments=comment.sub_comments[:n])
+            comment_tree.replies[comment.comment_id].CopyFrom(sub_comments_response)
         return comment_tree
 
     def MonitorUpdates(self, request, context):
@@ -166,11 +166,10 @@ class RedditServicer(a3_pb2_grpc.RedditServiceServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     a3_pb2_grpc.add_RedditServiceServicer_to_server(RedditServicer(), server)
-    port = "4000"
-    # server.add_insecure_port('[::]:50051')
-    server.add_insecure_port("[::]:" + port)
+    port = 4000  # Define port as an integer
+    server.add_insecure_port("[::]:" + str(port))  # Convert port to a string before concatenating
     server.start()
-    print("Server started, listening on " + port)
+    print("Server started, listening on " + str(port))
     server.wait_for_termination()
 
 if __name__ == '__main__':
